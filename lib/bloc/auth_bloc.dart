@@ -19,10 +19,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user != null) {
         emit(AuthAuthenticated(event.username));
       } else {
-        emit(AuthError("Invalid username or password"));
+        emit(AuthError("Usuário e/ou senha inválidos!"));
       }
     } catch (e) {
-      emit(AuthError("An error occurred"));
+      emit(AuthError("Ocorreu um erro!"));
     }
   }
 

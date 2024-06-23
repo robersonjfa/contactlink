@@ -64,6 +64,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Contato salvo com sucesso!')));
+    _clearScreen();
+  }
+
+  void _clearScreen() {
+    setState(() {
+      _nameController.clear();
+      _phoneController.clear();
+      _photoPath = null;
+    });
     _scrollToBottom();
   }
 
