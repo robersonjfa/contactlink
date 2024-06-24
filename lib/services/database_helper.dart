@@ -42,6 +42,11 @@ class DatabaseHelper {
   }
 
   // TODO: implementar um excluir para contato
+  Future<int> deleteContact(Contact contact) async {
+    var dbClient = await db;
+    return await dbClient
+        .delete('contact', where: 'id = ?', whereArgs: [contact.id]);
+  }
 
   Future<int> saveContact(Contact contact) async {
     var dbClient = await db;

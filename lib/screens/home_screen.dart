@@ -140,6 +140,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: _photoPath != null ? _saveContact : null,
                 child: const Text('Salvar Contato'),
               ),
+              ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/about'),
+                child: const Text('Acessar Sobre'),
+              ),
             ],
           ),
         ),
