@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeCamera() async {
     _cameras = await availableCameras();
-    _cameraController = CameraController(_cameras[0], ResolutionPreset.medium);
+    _cameraController = CameraController(_cameras[1], ResolutionPreset.medium);
     await _cameraController.initialize();
     setState(() {
       _isCameraInitialized = true;
@@ -59,7 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String? photo = _photoPath;
 
     Contact newContact = Contact(name: name, phone: phone, photo: photo);
+    // salva no banco de dados
     await _dbHelper.saveContact(newContact);
+    // envia para o servidor
     await _apiService.sendContact(newContact);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -151,4 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _scrollController.dispose();
     super.dispose();
   }
+
+  // TODO: adicionar um botão e chamar uma tela sobre com informações de vocês
 }

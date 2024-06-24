@@ -41,6 +41,8 @@ class DatabaseHelper {
     await db.insert('user', {'username': 'admin', 'password': 'admin'});
   }
 
+  // TODO: implementar um excluir para contato
+
   Future<int> saveContact(Contact contact) async {
     var dbClient = await db;
     return await dbClient.insert('contact', contact.toMap());
