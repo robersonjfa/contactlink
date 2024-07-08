@@ -42,6 +42,8 @@ dependencies:
   camera: 
   flutter_bloc: 
   equatable: 
+  shared_preferences:
+  provider:
 
 dev_dependencies:
   flutter_test:

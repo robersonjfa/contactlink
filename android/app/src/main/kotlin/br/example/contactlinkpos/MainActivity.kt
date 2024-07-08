@@ -1,4 +1,4 @@
-package com.example.contactlink
+package br.edu.unoesc.contactlinkpos
 
 import io.flutter.embedding.android.FlutterActivity
 

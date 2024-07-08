@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -23,8 +22,8 @@ class _AboutScreenState extends State<AboutScreen> {
           )
         ],
       ),
-      body: Column(
-        children: [const Text('Roberson Alves')],
+      body: const Column(
+        children: [Text('Roberson Alves')],
       ),
     );
   }

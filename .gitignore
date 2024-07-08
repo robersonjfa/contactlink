@@ -41,3 +41,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+encryption_public_key.pem
+mykey.keystore
+pepk.jar
+output.zip
+minhakeystore.jks
+contactlink.zip

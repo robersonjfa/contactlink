@@ -1,6 +1,10 @@
+import 'package:contactlink/screens/photo_capture_screen.dart';
+import 'package:contactlink/theme_manager.dart';
+import 'package:contactlink/widgets/contact_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import '../models/contact.dart';
 import '../services/database_helper.dart';
@@ -22,8 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _photoPath;
   late CameraController _cameraController;
-  late List<CameraDescription> _cameras;
-  bool _isCameraInitialized = false;
+  List<Contact> _contacts = [];
 
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final ApiService _apiService = ApiService();
@@ -31,23 +34,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
+    _loadContacts();
   }
 
-  Future<void> _initializeCamera() async {
-    _cameras = await availableCameras();
-    _cameraController = CameraController(_cameras[1], ResolutionPreset.medium);
-    await _cameraController.initialize();
+  Future<void> _loadContacts() async {
+    List<Contact> contacts = await _dbHelper.getContacts();
     setState(() {
-      _isCameraInitialized = true;
+      _contacts = contacts;
     });
   }
 
-  void _takePicture() async {
-    if (_cameraController.value.isInitialized) {
-      XFile picture = await _cameraController.takePicture();
+  void _navigateToPhotoCapture() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const PhotoCaptureScreen()),
+    );
+
+    if (result != null) {
       setState(() {
-        _photoPath = picture.path;
+        _photoPath = result;
       });
       _scrollToBottom();
     }
@@ -67,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Contato salvo com sucesso!')));
     _clearScreen();
+    _loadContacts(); // Refresh contact list
   }
 
   void _clearScreen() {
@@ -88,6 +94,17 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _editContact(Contact contact) {
+    _nameController.text = contact.name;
+    _phoneController.text = contact.phone;
+    _photoPath = contact.photo;
+  }
+
+  void _deleteContact(int id) async {
+    await _dbHelper.deleteContact(id);
+    _loadContacts(); // Refresh contact list
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,10 +119,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.info_rounded),
+            onPressed: () => Navigator.pushNamed(context, '/about'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.color_lens),
+            onPressed: () {
+              Provider.of<ThemeManager>(context, listen: false).toggleTheme();
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               BlocProvider.of<AuthBloc>(context).add(AuthLogoutRequested());
-              Navigator.pushReplacementNamed(context, '/');
+              Navigator.pushReplacementNamed(context, '/login');
             },
           ),
         ],
@@ -125,24 +152,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: const InputDecoration(labelText: 'Telefone'),
               ),
               const SizedBox(height: 20),
-              _isCameraInitialized
-                  ? AspectRatio(
-                      aspectRatio: _cameraController.value.aspectRatio,
-                      child: CameraPreview(_cameraController),
+              _photoPath != null
+                  ? Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: Image.file(
+                        File(_photoPath!),
+                        fit: BoxFit.cover,
+                      ),
                     )
                   : Container(),
-              const SizedBox(height: 20),
-              _photoPath != null ? Image.file(File(_photoPath!)) : Container(),
               ElevatedButton(
-                  onPressed: _takePicture, child: const Text('Capturar Foto')),
+                  onPressed: _navigateToPhotoCapture,
+                  child: const Text('Capturar Foto')),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _photoPath != null ? _saveContact : null,
+                onPressed: _saveContact,
+                //onPressed: _photoPath != null ? _saveContact : null,
                 child: const Text('Salvar Contato'),
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/about'),
-                child: const Text('Acessar Sobre'),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: _contacts.length,
+                itemBuilder: (context, index) {
+                  Contact contact = _contacts[index];
+                  return ContactItem(
+                    contact: contact,
+                    onEdit: () => _editContact(contact),
+                    onDelete: () => _deleteContact(contact.id!),
+                  );
+                },
               ),
             ],
           ),
@@ -157,6 +199,4 @@ class _HomeScreenState extends State<HomeScreen> {
     _scrollController.dispose();
     super.dispose();
   }
-
-  // TODO: adicionar um botão e chamar uma tela sobre com informações de vocês
 }

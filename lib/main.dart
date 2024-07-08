@@ -1,24 +1,36 @@
+import 'package:contactlink/routes.dart';
+import 'package:contactlink/theme_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'routes.dart';
-import 'bloc/auth_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:contactlink/bloc/auth_bloc.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AuthBloc(),
-      child: MaterialApp(
-        title: 'Contact Link App',
-        theme: ThemeData(primarySwatch: Colors.blue),
-        initialRoute: AppRoutes.login,
-        routes: AppRoutes.define(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(), // Initialize your AuthBloc here
+        ),
+        // Add more BlocProviders for other blocs if needed
+      ],
+      child: ChangeNotifierProvider(
+        create: (_) => ThemeManager(),
+        child: Consumer<ThemeManager>(
+          builder: (context, themeManager, child) {
+            return MaterialApp(
+              title: 'ContactLink App',
+              theme: themeManager.themeData,
+              initialRoute: AppRoutes.splash,
+              routes: AppRoutes.define(),
+            );
+          },
+        ),
       ),
     );
   }
